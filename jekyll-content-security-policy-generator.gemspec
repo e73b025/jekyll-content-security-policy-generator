@@ -12,10 +12,10 @@ Gem::Specification.new do |spec|
   spec.licenses      = ["MIT"]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r!^(test|spec|features)/!)  }
   spec.require_paths = ["lib"]
-  spec.add_dependency "jekyll", "~> 3.0"
+  spec.add_dependency "jekyll"
   spec.add_dependency "nokogiri"
   spec.add_dependency "digest"
-  spec.add_development_dependency "rake", "~> 11.0"
-  spec.add_development_dependency "rspec", "~> 3.5"
-  spec.add_development_dependency "rubocop", "~> 0.52"
+  spec.add_development_dependency "rake",
+  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rubocop"
 end
