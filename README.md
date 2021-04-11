@@ -21,15 +21,40 @@ To speed up development of Jekyll based sites whilst also helping to generate se
 
 ## Installation
 
-Install the gem:
-
-```gem install jekyll-content-security-policy-generator```
-
-Then add this to your _config.yml:
+Add the plugin your Gemfile within the jekyll_plugins group:
 
 ```
-plugins:
-  - jekyll-content-security-policy-generator
+group :jekyll_plugins do
+  gem 'jekyll-content-security-policy-generator'
+  ... other gem files
+end
+```
+
+Then install
+
+```
+bundle install
+```
+
+## Nokogiri Error on Mac?
+
+For some reason, Nokogiri will install with both the ARM (M1) and x86 variants which will confuse bundler. Best way I found to fix this was to open the Gemfile.lock and remove the:
+
+```
+nokogiri (1.11.3-arm64-darwin)
+  racc (~> 1.4)
+```
+
+Or the x86 if you have an M1 mac.
+
+Alternatively, you can add ```nokogiri``` to your Gemfile, like so:
+
+```
+group :jekyll_plugins do
+  gem 'nokogiri'
+  gem 'jekyll-content-security-policy-generator'
+  ... other gem files
+end
 ```
 
 ## Support
