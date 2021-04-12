@@ -2,6 +2,7 @@ require 'jekyll'
 require 'nokogiri'
 require 'digest'
 require 'open-uri'
+require 'uri'
 
 ##
 # Provides the ability to generate a content security policy for inline scripts and styles.
@@ -30,11 +31,19 @@ module Jekyll
       def generate_convert_security_policy_meta_tag
         meta_content = ""
 
+        @csp_script_src = @csp_script_src.uniq
+        @csp_image_src = @csp_image_src.uniq
+        @csp_style_src = @csp_style_src.uniq
+        @csp_script_src = @csp_script_src.uniq
+        @csp_unknown = @csp_unknown.uniq
+
         if @csp_frame_src.length > 0
+          @csp_script_src.uniq
           meta_content += "frame-src " + @csp_frame_src.join(' ') + '; '
         end
 
         if @csp_image_src.length > 0
+          Jekyll.logger.warn @csp_image_src
           meta_content += "img-src " + @csp_image_src.join(' ') + '; '
         end
 
@@ -55,10 +64,10 @@ module Jekyll
         end
 
         if @nokogiri.at("head")
-          Jekyll.logger.info "Generated content security policy, inserted in HEAD."
+          #Jekyll.logger.info "Generated content security policy, inserted in HEAD."
           @nokogiri.at("head") << "<meta http-equiv=\"Content-Security-Policy\" content=\"" + meta_content + "\">"
         elsif @nokogiri.at("body")
-          Jekyll.logger.info "Generated content security policy, inserted in BODY."
+          #Jekyll.logger.info "Generated content security policy, inserted in BODY."
           @nokogiri.at("body") << "<meta http-equiv=\"Content-Security-Policy\" content=\"" + meta_content + "\">"
         else
           Jekyll.logger.error "Generated content security policy but found no-where to insert it."
@@ -84,16 +93,12 @@ module Jekyll
 
               if policy_parts[0] == 'script-src'
                 @csp_script_src.concat(policy_parts.drop(1))
-                @csp_script_src = @csp_script_src.uniq
               elsif policy_parts[0] == 'style-src'
                 @csp_style_src.concat(policy_parts.drop(1))
-                @csp_style_src = @csp_style_src.uniq
               elsif policy_parts[0] == 'image-src'
                 @csp_image_src.concat(policy_parts.drop(1))
-                @csp_image_src = @csp_image_src.uniq
               elsif policy_parts[0] == 'frame-src'
                 @csp_frame_src.concat(policy_parts.drop(1))
-                @csp_frame_src = @csp_frame_src.uniq
               else
                 @csp_unknown.concat([policy_parts])
               end
@@ -124,11 +129,11 @@ module Jekyll
 
             if @nokogiri.at('head')
               @nokogiri.at('head') << new_element
-              Jekyll.logger.info'Converting style attribute to inline style, inserted into HEAD.'
+              #Jekyll.logger.info'Converting style attribute to inline style, inserted into HEAD.'
             else
               if @nokogiri.at('body')
                 @nokogiri.at('body') << new_element
-                Jekyll.logger.info'Converting style attribute to inline style, inserted into BODY.'
+                #Jekyll.logger.info'Converting style attribute to inline style, inserted into BODY.'
               else
                 Jekyll.logger.warn'Unable to convert style attribute to inline style, no HEAD or BODY found.'
               end
@@ -147,6 +152,19 @@ module Jekyll
             @csp_image_src.push find_src.match(/(.*\/)+(.*$)/)[1]
           end
         end
+
+        @nokogiri.css('style').each do |find|
+          finds = find.content.scan(/url\(([^\)]+)\)/)
+
+          finds.each do |innerFind|
+            innerFind = innerFind[0]
+            innerFind = innerFind.tr('\'"', '')
+            if innerFind.start_with?('http', 'https')
+              @csp_image_src.push self.get_domain(innerFind)
+            end
+          end
+        end
+
       end
 
       ##
@@ -193,6 +211,11 @@ module Jekyll
             @csp_frame_src.push find_src.match(/(.*\/)+(.*$)/)[1]
           end
         end
+      end
+
+      def get_domain(url)
+        uri = URI.parse(url)
+        "#{uri.scheme}://#{uri.host}"
       end
 
       ##
