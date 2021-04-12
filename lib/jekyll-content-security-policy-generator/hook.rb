@@ -43,7 +43,6 @@ module Jekyll
         end
 
         if @csp_image_src.length > 0
-          Jekyll.logger.warn @csp_image_src
           meta_content += "img-src " + @csp_image_src.join(' ') + '; '
         end
 
@@ -64,10 +63,10 @@ module Jekyll
         end
 
         if @nokogiri.at("head")
-          #Jekyll.logger.info "Generated content security policy, inserted in HEAD."
+          Jekyll.logger.info "Generated content security policy, inserted in HEAD."
           @nokogiri.at("head") << "<meta http-equiv=\"Content-Security-Policy\" content=\"" + meta_content + "\">"
         elsif @nokogiri.at("body")
-          #Jekyll.logger.info "Generated content security policy, inserted in BODY."
+          Jekyll.logger.info "Generated content security policy, inserted in BODY."
           @nokogiri.at("body") << "<meta http-equiv=\"Content-Security-Policy\" content=\"" + meta_content + "\">"
         else
           Jekyll.logger.error "Generated content security policy but found no-where to insert it."
@@ -134,11 +133,11 @@ module Jekyll
 
             if @nokogiri.at('head')
               @nokogiri.at('head') << new_element
-              #Jekyll.logger.info'Converting style attribute to inline style, inserted into HEAD.'
+              Jekyll.logger.info'Converting style attribute to inline style, inserted into HEAD.'
             else
               if @nokogiri.at('body')
                 @nokogiri.at('body') << new_element
-                #Jekyll.logger.info'Converting style attribute to inline style, inserted into BODY.'
+                Jekyll.logger.info'Converting style attribute to inline style, inserted into BODY.'
               else
                 Jekyll.logger.warn'Unable to convert style attribute to inline style, no HEAD or BODY found.'
               end
