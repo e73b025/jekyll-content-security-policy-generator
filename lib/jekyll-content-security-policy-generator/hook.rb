@@ -257,8 +257,6 @@ module Jekyll
       end
     end
 
-
-
     ##
     # Write document contents
     def write(dest)
@@ -266,11 +264,11 @@ module Jekyll
 
       if File.extname(dest_path) == ".html"
         content_security_policy_generator = ContentSecurityPolicyGenerator.new output
-        output = content_security_policy_generator.run
+        self.write_file_contents(dest_path, content_security_policy_generator.run)
       else
-        output = File.read(dest_path)
+        self.write_file_contents(dest_path, output)
       end
-      write_file_contents(dest_path, output)
+
     end
 
   end
