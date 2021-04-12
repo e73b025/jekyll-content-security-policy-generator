@@ -95,7 +95,7 @@ module Jekyll
                 @csp_script_src.concat(policy_parts.drop(1))
               elsif policy_parts[0] == 'style-src'
                 @csp_style_src.concat(policy_parts.drop(1))
-              elsif policy_parts[0] == 'image-src'
+              elsif policy_parts[0] == 'img-src'
                 @csp_image_src.concat(policy_parts.drop(1))
               elsif policy_parts[0] == 'frame-src'
                 @csp_frame_src.concat(policy_parts.drop(1))
@@ -106,6 +106,10 @@ module Jekyll
             else
               Jekyll.logger.warn "Incorrect existing content security policy meta tag found, skipping."
             end
+          end
+
+          @nokogiri.search('meta[http-equiv="Content-Security-Policy"]').each do |el|
+            el.remove
           end
         end
       end
@@ -120,7 +124,8 @@ module Jekyll
             if find.attr('id')
               element_id = find.attr('id')
             else
-              element_id = Digest::MD5.hexdigest find_src + "#{Random.rand(11)}"
+              hash = Digest::MD5.hexdigest find_src + "#{Random.rand(11)}"
+              element_id = "csp-gen-" + hash
               find["id"] = element_id
             end
 
@@ -148,7 +153,7 @@ module Jekyll
         @nokogiri.css('img').each do |find|
           find_src = find.attr('src')
 
-          if find_src.start_with?('http', 'https')
+          if find_src and find_src.start_with?('http', 'https')
             @csp_image_src.push find_src.match(/(.*\/)+(.*$)/)[1]
           end
         end
@@ -174,7 +179,7 @@ module Jekyll
           if find.attr('src')
             find_src = find.attr('src')
 
-            if find_src.start_with?('http', 'https')
+            if find_src and find_src.start_with?('http', 'https')
               @csp_script_src.push find_src.match(/(.*\/)+(.*$)/)[1]
             end
 
@@ -191,7 +196,7 @@ module Jekyll
           if find.attr('src')
             find_src = find.attr('src')
 
-            if find_src.start_with?('http', 'https')
+            if find_src and find_src.start_with?('http', 'https')
               @csp_style_src.push find_src.match(/(.*\/)+(.*$)/)[1]
             end
 
@@ -207,7 +212,7 @@ module Jekyll
         @nokogiri.css('iframe').each do |find|
           find_src = find.attr('src')
 
-          if find_src.start_with?('http', 'https')
+          if find_src and find_src.start_with?('http', 'https')
             @csp_frame_src.push find_src.match(/(.*\/)+(.*$)/)[1]
           end
         end
@@ -260,9 +265,8 @@ module Jekyll
       if File.extname(dest_path) == ".html"
         content_security_policy_generator = ContentSecurityPolicyGenerator.new output
         output = content_security_policy_generator.run
+        write_file_contents(dest_path, output)
       end
-
-      write_file_contents(dest_path, output)
     end
 
   end
