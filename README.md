@@ -20,6 +20,14 @@ To speed up development of Jekyll based sites whilst also helping to generate se
 * Creates or reuses an HTTP meta tag for the content security policy.
 * Finds all images, styles, scripts and frames with external URLs and builds CSP.
 * Converts style attributes into ```<style>``` elements.
+* If a page already has a content-security-policy tag, (such as your index.html file), the script will reuse it.
+* Image URLs such as https://strongscot.com/images/logo.svg will have a rule such as https://strongscot.com/images/
+
+## Upcoming Features
+
+* Ability to specify how lax the domain rules can be. For example, ```https://strongscot.com/images/logo.svg``` would be converted to
+```https://strongscot.com/images/``` under strict and ```https://strongscot.com``` under relaxed.
+* Ability in site.yaml file to specify what files it should parse, at the moment its only ```.html```.
 
 ## Installation
 
