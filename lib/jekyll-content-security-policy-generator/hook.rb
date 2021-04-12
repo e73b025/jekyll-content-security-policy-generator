@@ -257,15 +257,20 @@ module Jekyll
       end
     end
 
+
+
     ##
     # Write document contents
     def write(dest)
       dest_path = destination(dest)
+
       if File.extname(dest_path) == ".html"
         content_security_policy_generator = ContentSecurityPolicyGenerator.new output
         output = content_security_policy_generator.run
-        write_file_contents(dest_path, output)
+      else
+        output = File.read(dest_path)
       end
+      write_file_contents(dest_path, output)
     end
 
   end
@@ -288,6 +293,7 @@ module Jekyll
     # Write page contents
     def write(dest)
       super dest
+
       Jekyll::Hooks.trigger hook_owner, :post_write, self
     end
   end
