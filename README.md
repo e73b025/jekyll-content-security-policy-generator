@@ -12,7 +12,7 @@ information and build a style element to which will also pass through the conten
 
 ## Goal
 
-To speed up development of Jekyll based sites whilst also helping to generate secure HTMl files protected from XSS.
+To speed up development of Jekyll based sites whilst also helping to generate secure HTML files protected from XSS.
 
 ## Features
 
